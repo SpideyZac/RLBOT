@@ -87,6 +87,8 @@ curentNetwork = -1
 
 myTeamScore = 0
 pastTeamScore = 0
+opoTeamScore = 0
+pastOpoTeamScore = 0
 
 class Bob(GoslingAgent):
     def run(agent):
@@ -96,10 +98,18 @@ class Bob(GoslingAgent):
             global curentNetwork
             global networks
             global fitness
+            global opoTeamScore
+            global pastOpoTeamScore
             myTeamScore = agent.game.friend_score
+            opoTeamScore = agent.game.foe_score
             if myTeamScore > pastTeamScore:
                 fitness[curentNetwork] += 10
                 pastTeamScore = myTeamScore
+            if opoTeamScore > pastOpoTeamScore:
+                fitness[curentNetwork] -= 10
+            if opoTeamScore > pastOpoTeamScore and agent.ball.latest_touched_team == agent.team:
+                fitness[curentNetwork] -= 50
+            pastOpoTeamScore = opoTeamScore
             if curentNetwork + 1 < 5:
                 curentNetwork += 1
             else:
@@ -152,3 +162,6 @@ class Bob(GoslingAgent):
                         bestIndex = i
                 if agent.me.boost < 100:
                     agent.push(goto_boost(agent.boosts[bestIndex]))
+                else:
+                    defaultPD(agent, agent.me.local(agent.ball.location - agent.me.location))
+                    defaultThrottle(agent, 3500)
